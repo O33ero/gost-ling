@@ -44,7 +44,6 @@ func NewExecuteControl() *ExecuteControl {
 		}
 	}()
 
-	ec.run()
 	return ec
 }
 

@@ -1,10 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"gost-ling/internal/control"
 	"gost-ling/internal/lab1"
+	"os"
+	"sync"
+	"time"
 )
 
 func main() {
@@ -39,20 +43,51 @@ func main() {
 
 	cipher := lab1.NewOfb(key)
 	defer cipher.Close()
-	// Encrypt
-	encryptBlocks := cipher.Encrypt(plaintext, iv)
-	for i, block := range encryptBlocks {
-		fmt.Printf("Encrypt [%d]: %s\n", i, hex.EncodeToString(block[:]))
+	//// Encrypt
+	//encryptBlocks := cipher.Encrypt(plaintext, iv)
+	//for i, block := range encryptBlocks {
+	//	fmt.Printf("Encrypt [%d]: %s\n", i, hex.EncodeToString(block[:]))
+	//}
+	//
+	//// Decrypt
+	//var ciphertext []byte
+	//for _, block := range encryptBlocks {
+	//	ciphertext = append(ciphertext, block[:]...)
+	//}
+	//
+	//plainBlock := cipher.Decrypt(ciphertext, iv)
+	//for i, block := range plainBlock {
+	//	fmt.Printf("Decrypt [%d]: %s\n", i, hex.EncodeToString(block[:]))
+	//}
+
+	b, err := os.ReadFile("xoroshiro_1000mb.bin")
+	if err != nil {
+		panic("failed to read file: " + err.Error())
 	}
 
-	// Decrypt
-	var ciphertext []byte
-	for _, block := range encryptBlocks {
-		ciphertext = append(ciphertext, block[:]...)
-	}
+	var wg sync.WaitGroup
+	start := time.Now().UnixMilli()
+	for i := 0; i < len(b); i += 16 {
+		wg.Add(1)
+		go func(part int) {
+			defer wg.Done()
+			encryptBlocks := cipher.Encrypt(b[part:part+16], iv)
+			var ciphertext []byte
+			for _, block := range encryptBlocks {
+				ciphertext = append(ciphertext, block[:]...)
+			}
 
-	plainBlock := cipher.Decrypt(ciphertext, iv)
-	for i, block := range plainBlock {
-		fmt.Printf("Decrypt [%d]: %s\n", i, hex.EncodeToString(block[:]))
+			decryptBlocks := cipher.Decrypt(ciphertext[:], iv)
+			var decrypt []byte
+			for _, block := range decryptBlocks {
+				decrypt = append(decrypt, block[:]...)
+			}
+
+			if !bytes.Equal(b[part:part+16], decrypt[:]) {
+				panic("incorrect decrypt")
+			}
+		}(i)
 	}
+	wg.Wait()
+	fmt.Printf("Complete in %d msec.\n", time.Now().UnixMilli()-start)
 }
