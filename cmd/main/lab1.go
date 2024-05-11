@@ -32,9 +32,9 @@ func main() {
 	}
 	fmt.Printf("Plain: %s\n", hex.EncodeToString(plaintext))
 
-	cipher := lab1.NewOfb(iv, key)
+	cipher := lab1.NewOfb(key)
 	// Encrypt
-	encryptBlocks := cipher.Encrypt(plaintext)
+	encryptBlocks := cipher.Encrypt(plaintext, iv)
 	for i, block := range encryptBlocks {
 		fmt.Printf("Encrypt [%d]: %s\n", i, hex.EncodeToString(block[:]))
 	}
@@ -45,7 +45,7 @@ func main() {
 		ciphertext = append(ciphertext, block[:]...)
 	}
 
-	plainBlock := cipher.Decrypt(ciphertext)
+	plainBlock := cipher.Decrypt(ciphertext, iv)
 	for i, block := range plainBlock {
 		fmt.Printf("Decrypt [%d]: %s\n", i, hex.EncodeToString(block[:]))
 	}

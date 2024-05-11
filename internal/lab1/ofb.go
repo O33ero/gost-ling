@@ -6,33 +6,24 @@ import (
 )
 
 type Ofb struct {
-	cipher        *Cipher
-	initialVector []byte
+	cipher *Cipher
 }
 
 func (c *Ofb) Close() {
-	for i := 0; i < len(c.initialVector); i++ {
-		c.initialVector[i] = 0x00
-	}
 	runtime.GC()
 	fmt.Printf("Clear mem [Ofb]: %p\n", &c)
 }
 
-func NewOfb(iv []byte, key []byte) *Ofb {
-	if len(iv) != BlockSize {
-		panic("initial vector should be 16 bytes")
-	}
-
+func NewOfb(key []byte) *Ofb {
 	return &Ofb{
-		cipher:        NewCipher(key),
-		initialVector: iv,
+		cipher: NewCipher(key),
 	}
 }
 
-func (c *Ofb) Encrypt(plaintext []byte) [][BlockSize]byte {
+func (c *Ofb) Encrypt(plaintext []byte, iv []byte) [][BlockSize]byte {
 	var result [][BlockSize]byte
 
-	plainBlock := c.initialVector
+	plainBlock := iv
 	for i := 0; i < len(plaintext); i += BlockSize {
 		iterBlock := c.cipher.Encrypt(plainBlock)
 
@@ -46,10 +37,10 @@ func (c *Ofb) Encrypt(plaintext []byte) [][BlockSize]byte {
 	return result
 }
 
-func (c *Ofb) Decrypt(ciphertext []byte) [][BlockSize]byte {
+func (c *Ofb) Decrypt(ciphertext []byte, iv []byte) [][BlockSize]byte {
 	var result [][BlockSize]byte
 
-	cipherBlock := c.initialVector
+	cipherBlock := iv
 	for i := 0; i < len(ciphertext); i += BlockSize {
 		iterBlock := c.cipher.Encrypt(cipherBlock)
 
