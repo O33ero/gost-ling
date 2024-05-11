@@ -10,6 +10,7 @@ type Ofb struct {
 }
 
 func (c *Ofb) Close() {
+	c.cipher.Close()
 	runtime.GC()
 	fmt.Printf("Clear mem [Ofb]: %p\n", &c)
 }

@@ -3,10 +3,15 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
+	"gost-ling/internal/control"
 	"gost-ling/internal/lab1"
 )
 
 func main() {
+	control.NewAccessControl()
+	ec := control.NewExecuteControl()
+	defer ec.Wait()
+
 	iv := []byte{
 		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
 		0x10, 0x21, 0x32, 0x43, 0x54, 0x65, 0x76, 0x87,
@@ -33,6 +38,7 @@ func main() {
 	fmt.Printf("Plain: %s\n", hex.EncodeToString(plaintext))
 
 	cipher := lab1.NewOfb(key)
+	defer cipher.Close()
 	// Encrypt
 	encryptBlocks := cipher.Encrypt(plaintext, iv)
 	for i, block := range encryptBlocks {

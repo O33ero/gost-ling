@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
+	"gost-ling/internal/control"
 	"gost-ling/internal/lab4"
 )
 
@@ -12,6 +13,10 @@ const (
 )
 
 func main() {
+	control.NewAccessControl()
+	ec := control.NewExecuteControl()
+	defer ec.Wait()
+
 	// input:
 	// - plaintext
 	// - key

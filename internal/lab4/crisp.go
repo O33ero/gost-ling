@@ -43,8 +43,10 @@ func (c *Crisp) Close() {
 	}
 	c.Decoder.kdf.Close()
 	c.Decoder.seqNum = 0
+	c.Decoder.cipher.Close()
 	c.Encoder.kdf.Close()
 	c.Encoder.seqNum = 0
+	c.Encoder.cipher.Close()
 	runtime.GC()
 	fmt.Printf("Clear mem [Crisp]: %p\n", &c)
 }
@@ -79,17 +81,18 @@ func New(key []byte, randomSeed [32]byte) *Crisp {
 	}
 
 	kdf := lab2.NewKDF(key[:])
+	cipher := lab1.NewOfb(key)
 	return &Crisp{
 		Decoder: &Decoder{
 			random: lab3.New(randomSeed[:]),
 			kdf:    kdf,
-			cipher: lab1.NewOfb(key),
+			cipher: cipher,
 			seqNum: 0,
 		},
 		Encoder: &Encoder{
 			random: lab3.New(randomSeed[:]),
 			kdf:    kdf,
-			cipher: lab1.NewOfb(key),
+			cipher: cipher,
 			seqNum: 0,
 		},
 		randomSeed: randomSeed,
