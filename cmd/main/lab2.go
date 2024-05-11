@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gost-ling/internal/control"
 	"gost-ling/internal/lab2"
+	"time"
 )
 
 func main() {
@@ -59,5 +60,18 @@ func main() {
 	//		d323f2991c8d4534
 	//		013137010a83754f
 	//		d0af6d7cd4922ed9
+
+	//generate file
+	start := time.Now().UnixMilli()
+	lab2.Create10in4Keys(key) // 2800 msec
+	fmt.Printf("Create 10^4 keys: %d msec.\n", time.Now().UnixMilli()-start)
+
+	start = time.Now().UnixMilli()
+	lab2.Create10in5Keys(key) // 29 sec
+	fmt.Printf("Create 10^5 keys: %d msec.\n", time.Now().UnixMilli()-start)
+
+	start = time.Now().UnixMilli()
+	lab2.Create10in6Keys(key) // 300 sec
+	fmt.Printf("Create 10^6 keys: %d msec.\n", time.Now().UnixMilli()-start)
 
 }
